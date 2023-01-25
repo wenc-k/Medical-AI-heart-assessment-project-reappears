@@ -87,7 +87,7 @@ $$
 
   ​									*带颜色的直线代表label中显示出的ES和ED的帧*
 
-  <video src="../../../0X1A3D565B371DC573.avi"></video>
+  <video src="assets/0X1A3D565B371DC573.avi"></video>
 
 ​											*实线代表计算的 ES，而虚线代表人类标记的 ES 和 ED*
 
