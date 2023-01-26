@@ -15,18 +15,18 @@ $$
 1. **Segmentation**: 构建一个**具有空洞卷积的CNN模型用于左心室帧级级别的语义分割,用于标记左心室**
    + 针对图像语义分割问题中**下采样**会降低图像分辨率、丢失信息而提出的一种卷积思路。
    + 利用添加空洞扩大感受野，让原本3x3的卷积核，在相同参数量和计算量下拥有5x5或者更大的感受野，从而无需下采样
-2. **Video**: 在Segmentation的训练基础上训练一个**具有残差连接和跨帧时空卷积的CNN模型来进行视频级(video-level)预测射血分数**
+2. **Video**: 训练一个**具有残差连接和跨帧时空卷积的CNN模型来进行视频级(video-level)预测射血分数**
 
 3. **Statistical Analysis**：在两者的基础上利用R语言统计方法**进行心脏功能的逐搏( beat-to-beat)估计**
    + 考虑到各种心脏条件下的负荷条件和心率变化可能引起心脏功能变化，建议对最多五个心动周期的射血分数进行估计
    + 模型识别每个心跳周期，生成一个**32帧的片段（ a clip of 32 frames）**，对每个心跳的射血分数的片段级估计进行平均作为测试时间的增加
 
-### Model 
+### Model
 
 1. 对左心室划分部分采于Segmentation模型：
    + 作者采用了带有空洞卷积(atrous convolution)的网络模型 **deeplabv3_resnet50**
 
-2. 在Segmentation的基础上，对心脏超声视频进行EF预测
+2. Video部分对心脏超声视频进行EF预测
    + 作者采用了**r2plus1d_18** 模型 
 
 ###Dataset
@@ -117,9 +117,9 @@ $$
 
 2. 绘制以标签 EF 和预测 EF 为横轴和纵轴的的散点图以及不同 thresh 为基准判断是否有心血管疾病的 AUC曲线
 
-<img src="./assets/image-20230125005843446.png" alt="image-20230125005843446" style="zoom:40%;" />                           <img src="./assets/image-20230125172917999.png" alt="image-20230125172917999" style="zoom:36%;" /> 
+<img src="./assets/image-20230125005843446.png" alt="image-20230125005843446" style="zoom:30%;" />                           <img src="./assets/image-20230125172917999.png" alt="image-20230125172917999" style="zoom:30%;" /> 
 
-​																									*以标签 EF 和预测 EF 为横轴和纵轴的的散点图*
+​																					*以标签 EF 和预测 EF 为横轴和纵轴的的散点图*
 
 + **曲线下面积:** 
 
@@ -181,15 +181,13 @@ str(sizeData)
 
 ## Change attempt
 
-1. 因为Segmentation部分采用了很经典的Deeplab v3模型，并且对于原模型可能在卷积操作的 stride 以及 pool- ing 过程中的下采样导致图像的 feature map 分辨率缩小问题上作出了优化（导致对密集信息的语义分割效率低下）
+1. Segmentation部分采用了很经典的Deeplab v3模型，并且对于原模型可能在卷积操作的 stride 以及 pool- ing 过程中的下采样导致图像的 feature map 分辨率缩小问题上作出了优化（导致对密集信息的语义分割效率低下）
 
-   + 原作者采用了 Atrous Convolution的方法，并移除了常规的 pooling 操作，从而使得 feature map 分辨率保持在原始分辨率的 1/16 或 1/8 。
-
-2. 由此，结合笔者期末了解了3D卷积（能够获取时空特征的直观手段，能够有效应用于有关video的任务）中的R2D,R3D,MCx等模型，原作者其实使用了其中的变式R(2+1)D,即一种混合卷积，利用2D卷积和1D卷积来逼近3D卷积。
+2. 结合笔者期末了解了3D卷积（能够获取时空特征的直观手段，能够有效应用于有关video的任务）中的R2D,R3D,MCx等模型，原作者其实使用了其中的变式R(2+1)D,即一种混合卷积，利用2D卷积和1D卷积来逼近3D卷积。
 
    ​            											<img src="./assets/image-20230125165609742.png" alt="image-20230125165609742" style="zoom:50%;" /><img src="./assets/image-20230125170508282.png" style="zoom:50%;" /> 
 
-3. 最终，既然要选择进行3D卷积处理视频信息数据，而R3D作为经典C3D模型基础上使用ResNet网络的模型，其涉及到的卷积核和 feature map 为 4D，虽然有着更好的运动识别能力，但是面临的问题其实在于它比2D模型多了很多的参数，更加的难以训练。但是该project拥有一个大规模的数据集，所以采用R3D模型之后应该会有很好的运动识别能力
+3. 既然要选择进行3D卷积处理视频信息数据，而R3D作为经典C3D模型基础上使用ResNet网络的模型，其涉及到的卷积核和 feature map 为 4D，虽然有着更好的运动识别能力，但是面临的问题其实在于它比2D模型多了很多的参数，更加的难以训练。但是该project拥有一个大规模的数据集，所以采用R3D模型之后应该会有很好的运动识别能力
 
 4. 最终，笔者决定在Video模块将原有的r2plus1d_18模型更改为r3d_18模型 -- model_name=r3d_18
 
@@ -217,9 +215,9 @@ str(sizeData)
 
 3. 以标签 EF 和预测 EF 为横轴和纵轴的的散点图
 
-    <img src="./assets/image-20230125005821489.png" alt="image-20230125005821489" style="zoom:40%;" />								<img src="./assets/image-20230125172917999.png" alt="image-20230125172917999" style="zoom:35.5%;" />
+    <img src="./assets/image-20230125005821489.png" alt="image-20230125005821489" style="zoom:30%;" />								<img src="./assets/image-20230125172917999.png" alt="image-20230125172917999" style="zoom:26%;" />
 
-​										**r3d_18**																						**r2plus1d_18**
+​										**r3d_18**													**r2plus1d_18**
 
 ## Summary
 
